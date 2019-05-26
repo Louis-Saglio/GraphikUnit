@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import time
 from abc import ABC
-from typing import Tuple, Union, List, Any
+from math import sqrt
+from tkinter import Tk
+from typing import Tuple, Union, List, Any, Iterable
 
 import pygame
 
@@ -12,11 +13,14 @@ Number = Union[int, float]
 
 
 class Motherboard:
-    def __init__(self, width: Number, height: Number):
-        self.height = height
-        self.width = width
+    def __init__(self, width: Number = None, height: Number = None):
+        if width is None or height is None:
+            screen = Tk()
+        self.height = height or screen.winfo_screenheight()
+        self.width = width or screen.winfo_screenwidth()
         self._units: List[Unit] = []
         self._window = pygame.display.set_mode((self.width, self.height))
+        self.laws: List[Law] = []
 
     def add_unit(self, unit: Unit):
         self._units.append(unit)
@@ -48,16 +52,26 @@ class Motherboard:
             )
 
     def loop(self):
-        while True:
+        run = True
+        total_time = 0
+        while run:
             try:
-                time.sleep(0.01)
+                # time.sleep(0.01)
                 self.erase_units()
                 for unit in self._units:
-                    unit.run()
+                    unit.run(total_time)
+                for law in self.laws:
+                    law.apply(self._units)
                 self.render_units()
-                pygame.display.flip()
+                if total_time % 3 == 0:
+                    pygame.display.flip()
+                # pygame.display.flip()
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        run = False
+                total_time += 1
             except KeyboardInterrupt:
-                break
+                run = False
 
 
 class Unit:
@@ -73,7 +87,19 @@ class Unit:
     def color(self) -> Any:
         raise NotImplementedError
 
-    def run(self):
+    def run(self, total_time: int, **kwargs):
+        raise NotImplementedError
+
+    @position.setter
+    def position(self, value):
+        raise NotImplementedError
+
+    def distance_with(self, other: Unit):
+        return sqrt((self.position[0] - other.position[0]) ** 2 + (self.position[1] - other.position[1]) ** 2)
+
+
+class Law:
+    def apply(self, units: Iterable[Unit]):
         raise NotImplementedError
 
 
