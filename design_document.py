@@ -29,11 +29,15 @@ class CustomUnit(MovableUnitMixin):
     def color(self) -> Any:
         return self._color
 
-    def run(self):
+    def run(self, total_time, **kwargs):
         self.move_toward(self.goal, self.speed)
         if randint(0, 49) == 0:
             self.goal = randint(-7450, 7450), randint(-4950, 4950)
             self.speed = random() * 5
+
+    @position.setter
+    def position(self, value):
+        self._position = value
 
 
 for _ in range(1_000):
