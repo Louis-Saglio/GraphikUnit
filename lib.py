@@ -3,13 +3,11 @@ from __future__ import annotations
 from abc import ABC
 from math import sqrt
 from tkinter import Tk
-from typing import Tuple, Union, List, Any, Iterable
+from typing import Tuple, List, Any, Iterable
 
 import pygame
 
-from lab import compute
-
-Number = Union[int, float]
+from lab import compute, Number, Force
 
 
 class Motherboard:
@@ -105,4 +103,4 @@ class Law:
 
 class MovableUnitMixin(Unit, ABC):
     def move_toward(self, direction: Tuple[Number, Number], distance: Number):
-        self.position = compute(self.position, direction, distance)
+        self.position = compute(Force(self.position, direction, distance))
