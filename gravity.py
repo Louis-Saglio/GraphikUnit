@@ -2,8 +2,7 @@ from math import sqrt
 from random import randint
 from typing import Tuple, Iterable
 
-from lab import divide
-from lib import MovableUnitMixin, Motherboard, Number, Law
+from lib import MovableUnitMixin, Motherboard, Number, Law, divide
 
 
 class Particle(MovableUnitMixin):
