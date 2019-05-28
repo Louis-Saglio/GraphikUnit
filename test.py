@@ -1,4 +1,6 @@
-from lab import compute, Force, sum_forces
+from lib import compute, Force, sum_forces
+
+from physics import distance_between
 
 
 def test1():
@@ -56,3 +58,7 @@ def test_sum_forces2():
 
 def test_sum_forces3():
     assert sum_forces([Force((0, 0), (3, 4), 5), Force((3, 4), (0, -4), 4)]) == Force((0, 0), (0, 0), 4)
+
+
+def test_distance_between1():
+    assert distance_between((0, 0), (3, 4)) == 5

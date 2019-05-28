@@ -27,7 +27,7 @@ class Force:
         self.origin = origin
 
     def __eq__(self, other: Force):
-        return self.intensity, self.direction, self.origin == other.intensity, other.direction, other.origin
+        return (self.intensity, self.direction, self.origin == other.intensity, other.direction, other.origin)
 
 
 def compute(force: Force):

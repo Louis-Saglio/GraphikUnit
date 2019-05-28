@@ -24,7 +24,7 @@ class Particle(MovableUnitMixin):
     def color(self) -> Tuple[Number, Number, Number]:
         # print(self.velocity)
         velocity = abs(self.velocity)
-        return 255, min(255, 0 + sqrt(velocity * 20000)), min(255, 0 + sqrt(velocity * 20000))
+        return (255, min(255, 0 + sqrt(velocity * 20000)), min(255, 0 + sqrt(velocity * 20000)))
 
     def run(self, total_time: int, **kwargs):
         pass
@@ -48,9 +48,7 @@ class Gravity(Law):
                     distance = unit.distance_with(other_unit)
                     force = divide((self.g * unit.mass * other_unit.mass), distance ** 2)
                     if distance > 30:
-                        unit.apply_force(
-                            force, other_unit.position
-                        )
+                        unit.apply_force(force, other_unit.position)
                     else:
                         unit.apply_force(-force, other_unit.position)
 
