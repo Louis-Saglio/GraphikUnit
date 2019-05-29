@@ -33,50 +33,34 @@ class Universe:
 
     def erase_units(self) -> None:
         for unit in self._units:
-            unit_x = unit.position[0] + (self._window.get_width() / 2) - (unit.dimensions[0] / 2)
-            unit_y = unit.position[1] + (self._window.get_height() / 2) - (unit.dimensions[1] / 2)
-            if unit_x <= self.width and unit_y <= self.height or 1:
-                pygame.draw.rect(
-                    self._window,
-                    (0, 0, 0),
-                    (
-                        unit_x,
-                        unit_y,
-                        unit.dimensions[0],
-                        unit.dimensions[1],
-                    ),
-                )
+            if unit.is_alive:
+                unit_x = unit.position[0] + (self.width / 2) - (unit.dimensions[0] / 2)
+                unit_y = unit.position[1] + (self.height / 2) - (unit.dimensions[1] / 2)
+                pygame.draw.rect(self._window, (0, 0, 0), (unit_x, unit_y, unit.dimensions[0], unit.dimensions[1]))
 
     def render_units(self) -> None:
         for unit in self._units:
-            unit_x = unit.position[0] + (self._window.get_width() / 2) - (unit.dimensions[0] / 2)
-            unit_y = unit.position[1] + (self._window.get_height() / 2) - (unit.dimensions[1] / 2)
-            if unit_x <= self.width / 2 and unit_y <= self.height / 2 or 1:
-                pygame.draw.rect(
-                    self._window,
-                    unit.color,
-                    (
-                        unit_x,
-                        unit_y,
-                        unit.dimensions[0],
-                        unit.dimensions[1],
-                    ),
-                )
+            if unit.is_alive:
+                unit_x = unit.position[0] + (self.width / 2) - (unit.dimensions[0] / 2)
+                unit_y = unit.position[1] + (self.height / 2) - (unit.dimensions[1] / 2)
+                pygame.draw.rect(self._window, unit.color, (unit_x, unit_y, unit.dimensions[0], unit.dimensions[1]))
 
     def loop(self):
         run = True
         total_time = 0
         while run:
             try:
-                time.sleep(0.01)
+                # time.sleep(0.01)
                 self.erase_units()
                 for unit in self._units:
-                    unit.exist()
+                    if unit.is_alive:
+                        unit.exist()
                 for law in self.laws:
                     for particle in self._units:
-                        for other_particle in self._units:
-                            if particle != other_particle:
-                                particle.apply_force(law.compute_force(particle, other_particle))
+                        if particle.is_alive:
+                            for other_particle in self._units:
+                                if other_particle.is_alive and particle != other_particle:
+                                    particle.apply_force(law.compute_force(particle, other_particle))
                 self.render_units()
                 pygame.display.flip()
                 for event in pygame.event.get():

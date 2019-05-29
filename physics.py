@@ -11,6 +11,7 @@ class Particle:
         self.mass = mass
         self.position = position
         self.velocity = velocity
+        self.is_alive = True
 
     def apply_force(self, force: Tuple[Number, Number]):
         for i in range(len(force)):
