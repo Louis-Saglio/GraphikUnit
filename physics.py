@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from math import sqrt
-from typing import Tuple, List
+from typing import Tuple, List, Union
 
-from lib import Number
+Number = Union[int, float]
 
 
 class Particle:

@@ -3,8 +3,7 @@ from random import randint, random
 from typing import Tuple, List
 
 from graphical_engine import Universe, GraphicalParticle
-from lib import Number
-from physics import Particle, Law, distance_between
+from physics import Particle, Law, distance_between, Number
 
 
 class Atom(GraphicalParticle):

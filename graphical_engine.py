@@ -4,8 +4,7 @@ from typing import List, Tuple
 
 import pygame
 
-from lib import Number
-from physics import Particle, Law
+from physics import Particle, Law, Number
 
 
 class GraphicalParticle(Particle):
@@ -50,7 +49,7 @@ class Universe:
         total_time = 0
         while run:
             try:
-                # time.sleep(0.01)
+                time.sleep(0.01)
                 self.erase_units()
                 for unit in self._units:
                     if unit.is_alive:
