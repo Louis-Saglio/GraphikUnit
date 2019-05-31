@@ -1,6 +1,7 @@
 # todo : make Merge law depend on particle dimensions (maybe not good idea)
 # todo : make color of merged particles be the color of the biggest one
 # todo : zoom during execution
+# todo : particles are rendered with a small shift of position proportional to particle size
 
 
 from math import sqrt
@@ -100,7 +101,7 @@ def main(
         universe.add_unit(
             Atom(universe, particles_init_mass(), particles_init_position_range(universe), particles_init_velocity())
         )
-    for particle in special_particles:
+    for particle in special_particles(universe):
         universe.add_unit(particle)
     for law in laws:
         universe.laws.append(law)
@@ -122,9 +123,9 @@ options = {
         "rand_0.002": lambda: [randint(-1, 1) / 500, randint(-1, 1) / 500],
     },
     "special_particles": {
-        "centered_big_star": lambda u: [u, Atom(4000, [0, 0], [0, 0])],
+        "centered_big_star": lambda u: [Atom(u, 4000, [0, 0], [0, 0])],
         "none": [],
-        "centered_small_star": lambda u: [u, Atom(4000, [0, 0], [0, 0])],
+        "centered_small_star": lambda u: [Atom(u, 4000, [0, 0], [0, 0])],
         "four_star": [
             lambda u: Atom(u, 500, [100, 100], [0, 0]),
             lambda u: Atom(u, 500, [-100, 100], [0, 0]),
