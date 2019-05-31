@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 from tkinter import Tk
 from typing import List, Tuple
@@ -8,6 +10,12 @@ from physics import Particle, Law, Number
 
 
 class GraphicalParticle(Particle):
+    def __init__(self, universe: Universe, mass: Number, position: List[Number], velocity: List[Number]):
+        super().__init__(mass, position, velocity)
+        self.universe = universe
+        self.old_graphical_position = [0, 0]
+        self.present_graphical_position = [0, 0]
+
     @property
     def color(self) -> Tuple[Number, Number, Number]:
         raise NotImplementedError
@@ -16,10 +24,33 @@ class GraphicalParticle(Particle):
     def dimensions(self) -> Tuple[Number, Number]:
         raise NotImplementedError
 
+    @property
+    def graphical_dimensions(self):
+        return (
+            max(1, self.dimensions[0] / self.universe.zoom_level),
+            max(1, self.dimensions[1] / self.universe.zoom_level),
+        )
+
+    @property
+    def graphical_position(self):
+        self.old_graphical_position = self.present_graphical_position
+        self.present_graphical_position = (
+            (self.position[0] / self.universe.zoom_level + (self.universe.width / 2) - (self.dimensions[0] / 2)),
+            (self.position[1] / self.universe.zoom_level + (self.universe.height / 2) - (self.dimensions[1] / 2)),
+        )
+        return self.present_graphical_position
+
 
 class Universe:
-    def __init__(self, width: Number = None, height: Number = None, draw_trajectory=False, sync_time=False):
-        self.zoom_level = 0  # 1 is normal, 2 is twice un-zoomed, 0.5 is twice zoomed
+    def __init__(
+        self,
+        width: Number = None,
+        height: Number = None,
+        zoom_level: Number = 1,
+        draw_trajectory=False,
+        sync_time=False,
+    ):
+        self.zoom_level = zoom_level  # 1 is normal, 2 is twice un-zoomed, 0.5 is twice zoomed
         self.sync_time = sync_time
         self.draw_trajectory = draw_trajectory
         if width is None or height is None:
@@ -33,40 +64,31 @@ class Universe:
     def add_unit(self, particle: GraphicalParticle):
         self._units.append(particle)
 
-    def _compute_graphical_positions(self):
-        for particle in self._units:
-            if particle.is_alive:
-                particle.graphical_position = (
-                    (particle.position[0] + (self.width / 2) - (particle.dimensions[0] / 2)),
-                    (particle.position[1] + (self.height / 2) - (particle.dimensions[1] / 2)),
-                )
-
     def erase_units(self) -> None:
         for particle in self._units:
-            if particle.is_alive:
+            if particle.is_alive or True:
+                gd = particle.graphical_dimensions
                 pygame.draw.rect(
                     self._window,
                     (0, 0, 0),
                     (
-                        particle.graphical_position[0],
-                        particle.graphical_position[1],
-                        particle.dimensions[0],
-                        particle.dimensions[1],
+                        particle.old_graphical_position[0],
+                        particle.old_graphical_position[1],
+                        gd[0],
+                        gd[1],
                     ),
                 )
 
     def render_units(self) -> None:
         for particle in self._units:
             if particle.is_alive:
+                gd = particle.graphical_dimensions
                 pygame.draw.rect(
                     self._window,
                     particle.color,
-                    (
-                        particle.graphical_position[0],
-                        particle.graphical_position[1],
-                        particle.dimensions[0],
-                        particle.dimensions[1],
-                    ),
+                    (particle.graphical_position[0], particle.graphical_position[1], gd[0], gd[1]),
+                    # there is a bug which makes caching particle.graphical_position in a variable
+                    # which causes some dead particles be displayed
                 )
 
     def apply_laws(self):
@@ -87,7 +109,6 @@ class Universe:
         total_time = 0
         while run:
             try:
-                self._compute_graphical_positions()
                 if not self.draw_trajectory:
                     self.erase_units()
                 self.render_units()

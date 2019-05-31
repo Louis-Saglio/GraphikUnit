@@ -1,3 +1,8 @@
+# todo : make Merge law depend on particle dimensions (maybe not good idea)
+# todo : make color of merged particles be the color of the biggest one
+# todo : zoom during execution
+
+
 from math import sqrt
 from random import randint, random
 from typing import Tuple, List, Callable
@@ -16,8 +21,10 @@ class Atom(GraphicalParticle):
         "random": lambda self: self._color,
     }
 
-    def __init__(self, mass: Number, position: List[Number], velocity: List[Number], color_option="random"):
-        super().__init__(mass, position, velocity)
+    def __init__(
+        self, universe: Universe, mass: Number, position: List[Number], velocity: List[Number], color_option="random"
+    ):
+        super().__init__(universe, mass, position, velocity)
         self.color_option = color_option
         if self.color_option == "random":
             self._color = randint(0, 255), randint(0, 255), randint(0, 255)
@@ -79,18 +86,19 @@ class Gravity(Law):
 
 def main(
     particle_nbr: Number,
-    special_particles: List[GraphicalParticle],
+    special_particles: Callable[..., List[GraphicalParticle]],
     particles_init_mass: Callable[..., Number],
     particles_init_position_range: Callable[[Universe], List[Number]],
     particles_init_velocity: Callable[..., List[Number]],
     laws: List[Law],
     draw_trajectory: bool,
     sync_time: bool,
+    zoom_level: Number,
 ):
-    universe = Universe(draw_trajectory=draw_trajectory, sync_time=sync_time)
+    universe = Universe(zoom_level=zoom_level, draw_trajectory=draw_trajectory, sync_time=sync_time)
     for _ in range(particle_nbr):
         universe.add_unit(
-            Atom(particles_init_mass(), particles_init_position_range(universe), particles_init_velocity())
+            Atom(universe, particles_init_mass(), particles_init_position_range(universe), particles_init_velocity())
         )
     for particle in special_particles:
         universe.add_unit(particle)
@@ -114,14 +122,14 @@ options = {
         "rand_0.002": lambda: [randint(-1, 1) / 500, randint(-1, 1) / 500],
     },
     "special_particles": {
-        "centered_big_star": [Atom(4000, [0, 0], [0, 0])],
+        "centered_big_star": lambda u: [u, Atom(4000, [0, 0], [0, 0])],
         "none": [],
-        "centered_small_star": [Atom(4000, [0, 0], [0, 0])],
+        "centered_small_star": lambda u: [u, Atom(4000, [0, 0], [0, 0])],
         "four_star": [
-            Atom(500, [100, 100], [0, 0]),
-            Atom(500, [-100, 100], [0, 0]),
-            Atom(500, [100, -100], [0, 0]),
-            Atom(500, [-100, -100], [0, 0]),
+            lambda u: Atom(u, 500, [100, 100], [0, 0]),
+            lambda u: Atom(u, 500, [-100, 100], [0, 0]),
+            lambda u: Atom(u, 500, [100, -100], [0, 0]),
+            lambda u: Atom(u, 500, [-100, -100], [0, 0]),
         ],
     },
     "laws": {"realistic": [Gravity(), Merge()], "pure_gravity": [Gravity()]},
@@ -130,12 +138,13 @@ options = {
 
 if __name__ == "__main__":
     main(
-        50,
+        100,
         options["special_particles"]["none"],
         options["mass"]["1to10"],
-        options["position"]["in_screen"],
+        options["position"]["in_half_screen"],
         options["velocity"]["rand_0.002"],
         options["laws"]["realistic"],
-        False,
-        False,
+        draw_trajectory=False,
+        sync_time=False,
+        zoom_level=2,
     )
