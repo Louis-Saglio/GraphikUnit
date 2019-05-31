@@ -1,20 +1,30 @@
 from math import sqrt
 from random import randint, random
-from typing import Tuple, List
+from typing import Tuple, List, Callable
 
 from graphical_engine import Universe, GraphicalParticle
 from physics import Particle, Law, distance_between, Number
 
 
 class Atom(GraphicalParticle):
-    def __init__(self, mass: Number, position: List[Number], velocity: List[Number]):
+    color_options = {
+        "dynamic": lambda self: (
+            255,
+            min(abs((self.velocity[0] + self.velocity[1] + 1) ** 6), 255),
+            min(abs((self.velocity[0] + self.velocity[1] + 1) ** 6), 255),
+        ),
+        "random": lambda self: self._color,
+    }
+
+    def __init__(self, mass: Number, position: List[Number], velocity: List[Number], color_option="random"):
         super().__init__(mass, position, velocity)
-        self._color = randint(0, 255), randint(0, 255), randint(0, 255)
+        self.color_option = color_option
+        if self.color_option == "random":
+            self._color = randint(0, 255), randint(0, 255), randint(0, 255)
 
     @property
     def color(self) -> Tuple[Number, Number, Number]:
-        total_velocity = self.velocity[0] + self.velocity[1]
-        return 255, min(abs((total_velocity + 1) ** 6), 255), min(abs((total_velocity + 1) ** 6), 255)
+        return self.color_options[self.color_option](self)
 
     @property
     def dimensions(self) -> Tuple[Number, Number]:
@@ -67,30 +77,65 @@ class Gravity(Law):
         )
 
 
-if __name__ == "__main__":
-    universe = Universe()
-    for _ in range(200):
+def main(
+    particle_nbr: Number,
+    special_particles: List[GraphicalParticle],
+    particles_init_mass: Callable[..., Number],
+    particles_init_position_range: Callable[[Universe], List[Number]],
+    particles_init_velocity: Callable[..., List[Number]],
+    laws: List[Law],
+    draw_trajectory: bool,
+    sync_time: bool,
+):
+    universe = Universe(draw_trajectory=draw_trajectory, sync_time=sync_time)
+    for _ in range(particle_nbr):
         universe.add_unit(
-            Atom(
-                # 1,
-                randint(1, 10) / 5,
-                # [randint(-universe.width * 2, universe.width * 2), randint(-universe.height * 2, universe.height * 2)],
-                # [0, 0],
-                # [randint(-universe.width / 4, universe.width / 4), randint(-universe.height / 4, universe.height / 4)],
-                # [randint(-universe.width, universe.width), randint(-universe.height, universe.height)],
-                [randint(-universe.width / 2, universe.width / 2), randint(-universe.height / 2, universe.height / 2)],
-                # [randint(-1, 1) / 500, randint(-1, 1) / 500],
-                # [(random() - 0.5) * 1, (random() - 0.5) * 1],
-                [-0.01, -0.01],
-            )
+            Atom(particles_init_mass(), particles_init_position_range(universe), particles_init_velocity())
         )
-    # universe.add_unit(Atom(500, [100, 100], [0, 0]))
-    # universe.add_unit(Atom(500, [-100, -100], [0, 0]))
-    # universe.add_unit(Atom(500, [-100, 100], [0, 0]))
-    # universe.add_unit(Atom(500, [100, -100], [0, 0]))
-    # universe.add_unit(Atom(4000, [0, 0], [0, 0]))
-    # universe.add_unit(Atom(1, [450, 200], [-0.05, -0.05]))
-    # universe.add_unit(Atom(1, [900, 400], [-0.05, -0.05]))
-    universe.laws.append(Gravity())
-    universe.laws.append(Merge())
+    for particle in special_particles:
+        universe.add_unit(particle)
+    for law in laws:
+        universe.laws.append(law)
     universe.loop()
+
+
+options = {
+    "mass": {"1": lambda: 1, "1to10": lambda: randint(1, 10)},
+    "position": {
+        "in_screen": lambda u: [randint(-u.width / 2, u.width / 2), randint(-u.height / 2, u.height / 2)],
+        "in_twice_screen": lambda u: [randint(-u.width, u.width), randint(-u.height, u.height)],
+        "in_half_screen": lambda u: [randint(-u.width / 4, u.width / 4), randint(-u.height / 4, u.height / 4)],
+        "in_2_3rd_of_screen": lambda u: [randint(-u.width / 3, u.width / 3), randint(-u.height / 3, u.height / 3)],
+    },
+    "velocity": {
+        "0": lambda: [0, 0],
+        "-0.01": lambda: [-0.01, -0.01],
+        "rand_0.5": lambda: [(random() - 0.5), (random() - 0.5)],
+        "rand_0.002": lambda: [randint(-1, 1) / 500, randint(-1, 1) / 500],
+    },
+    "special_particles": {
+        "centered_big_star": [Atom(4000, [0, 0], [0, 0])],
+        "none": [],
+        "centered_small_star": [Atom(4000, [0, 0], [0, 0])],
+        "four_star": [
+            Atom(500, [100, 100], [0, 0]),
+            Atom(500, [-100, 100], [0, 0]),
+            Atom(500, [100, -100], [0, 0]),
+            Atom(500, [-100, -100], [0, 0]),
+        ],
+    },
+    "laws": {"realistic": [Gravity(), Merge()], "pure_gravity": [Gravity()]},
+}
+
+
+if __name__ == "__main__":
+    main(
+        50,
+        options["special_particles"]["none"],
+        options["mass"]["1to10"],
+        options["position"]["in_screen"],
+        options["velocity"]["rand_0.002"],
+        options["laws"]["realistic"],
+        False,
+        False,
+    )

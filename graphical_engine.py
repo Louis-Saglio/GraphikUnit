@@ -18,7 +18,9 @@ class GraphicalParticle(Particle):
 
 
 class Universe:
-    def __init__(self, width: Number = None, height: Number = None):
+    def __init__(self, width: Number = None, height: Number = None, draw_trajectory=False, sync_time=False):
+        self.sync_time = sync_time
+        self.draw_trajectory = draw_trajectory
         if width is None or height is None:
             screen = Tk()
         self.height = height or screen.winfo_screenheight()
@@ -49,8 +51,10 @@ class Universe:
         total_time = 0
         while run:
             try:
-                time.sleep(0.01)
-                self.erase_units()
+                if self.sync_time:
+                    time.sleep(0.01)
+                if not self.draw_trajectory:
+                    self.erase_units()
                 for unit in self._units:
                     if unit.is_alive:
                         unit.exist()
