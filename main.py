@@ -13,11 +13,13 @@ class Atom(GraphicalParticle):
 
     @property
     def color(self) -> Tuple[Number, Number, Number]:
-        return self._color
+        total_velocity = self.velocity[0] + self.velocity[1]
+        return 255, min(abs((total_velocity + 1) ** 6), 255), min(abs((total_velocity + 1) ** 6), 255)
 
     @property
     def dimensions(self) -> Tuple[Number, Number]:
-        return sqrt(self.mass), sqrt(self.mass)
+        dim = sqrt(self.mass + 1)
+        return dim, dim
 
 
 def compute(origin, direction, intensity):
@@ -41,10 +43,10 @@ class Merge(Law):
     def compute_force(self, particle: Particle, other_particle: Particle) -> Tuple[Number, Number]:
         if distance_between(particle.position, other_particle.position) < 3:
             particle.is_alive = False
-            other_particle.mass += particle.is_alive
             total_mass = particle.mass + other_particle.mass
             p_share = particle.mass / total_mass
             o_share = other_particle.mass / total_mass
+            other_particle.mass += particle.mass
             other_particle.velocity = [
                 particle.velocity[0] * p_share + other_particle.velocity[0] * o_share,
                 particle.velocity[1] * p_share + other_particle.velocity[1] * o_share,
@@ -67,19 +69,28 @@ class Gravity(Law):
 
 if __name__ == "__main__":
     universe = Universe()
-    for _ in range(500):
+    for _ in range(200):
         universe.add_unit(
             Atom(
-                1,
-                # randint(1, 10) / 10,
+                # 1,
+                randint(1, 10) / 5,
                 # [randint(-universe.width * 2, universe.width * 2), randint(-universe.height * 2, universe.height * 2)],
-                # [randint(-universe.width / 3, universe.width / 3), randint(-universe.height / 3, universe.height / 3)],
+                # [0, 0],
+                # [randint(-universe.width / 4, universe.width / 4), randint(-universe.height / 4, universe.height / 4)],
+                # [randint(-universe.width, universe.width), randint(-universe.height, universe.height)],
                 [randint(-universe.width / 2, universe.width / 2), randint(-universe.height / 2, universe.height / 2)],
-                [randint(-1, 1) / 30, randint(-1, 1) / 30],
-                # [random() * - 0.5, random() - 0.5],
+                # [randint(-1, 1) / 500, randint(-1, 1) / 500],
+                # [(random() - 0.5) * 1, (random() - 0.5) * 1],
+                [-0.01, -0.01],
             )
         )
-    # universe.add_unit(Atom(30, [0, 0], [0, 0]))
+    # universe.add_unit(Atom(500, [100, 100], [0, 0]))
+    # universe.add_unit(Atom(500, [-100, -100], [0, 0]))
+    # universe.add_unit(Atom(500, [-100, 100], [0, 0]))
+    # universe.add_unit(Atom(500, [100, -100], [0, 0]))
+    # universe.add_unit(Atom(4000, [0, 0], [0, 0]))
+    # universe.add_unit(Atom(1, [450, 200], [-0.05, -0.05]))
+    # universe.add_unit(Atom(1, [900, 400], [-0.05, -0.05]))
     universe.laws.append(Gravity())
     universe.laws.append(Merge())
     universe.loop()

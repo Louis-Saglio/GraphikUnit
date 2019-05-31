@@ -15,7 +15,7 @@ class Particle:
 
     def apply_force(self, force: Tuple[Number, Number]):
         for i in range(len(force)):
-            self.velocity[i] += force[i]
+            self.velocity[i] += force[i] / self.mass
 
     def exist(self):
         for i in range(len(self.position)):
