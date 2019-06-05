@@ -1,7 +1,6 @@
 # todo : make Merge law depend on particle dimensions (maybe not good idea)
 # todo : make color of merged particles be the color of the biggest one
 # todo : zoom during execution
-# todo : particles are rendered with a small shift of position proportional to particle size
 
 
 from math import sqrt
@@ -35,9 +34,8 @@ class Atom(GraphicalParticle):
         return self.color_options[self.color_option](self)
 
     @property
-    def dimensions(self) -> Tuple[Number, Number]:
-        dim = sqrt(self.mass + 1)
-        return dim, dim
+    def dimension(self) -> Number:
+        return sqrt(self.mass)
 
 
 def compute(origin, direction, intensity):
@@ -124,13 +122,13 @@ options = {
     },
     "special_particles": {
         "centered_big_star": lambda u: [Atom(u, 4000, [0, 0], [0, 0])],
-        "none": [],
+        "none": lambda u: [],
         "centered_small_star": lambda u: [Atom(u, 4000, [0, 0], [0, 0])],
-        "four_star": [
-            lambda u: Atom(u, 500, [100, 100], [0, 0]),
-            lambda u: Atom(u, 500, [-100, 100], [0, 0]),
-            lambda u: Atom(u, 500, [100, -100], [0, 0]),
-            lambda u: Atom(u, 500, [-100, -100], [0, 0]),
+        "four_star": lambda u: [
+            Atom(u, 500, [100, 100], [0, 0]),
+            Atom(u, 500, [-100, 100], [0, 0]),
+            Atom(u, 500, [100, -100], [0, 0]),
+            Atom(u, 500, [-100, -100], [0, 0]),
         ],
     },
     "laws": {"realistic": [Gravity(), Merge()], "pure_gravity": [Gravity()]},
@@ -141,11 +139,12 @@ if __name__ == "__main__":
     main(
         100,
         options["special_particles"]["none"],
-        options["mass"]["1to10"],
-        options["position"]["in_half_screen"],
-        options["velocity"]["rand_0.002"],
+        options["mass"]["1"],
+        options["position"]["in_screen"],
+        options["velocity"]["0"],
+        # options["velocity"]["rand_0.5"],
         options["laws"]["realistic"],
         draw_trajectory=False,
         sync_time=False,
-        zoom_level=2,
+        zoom_level=1,
     )

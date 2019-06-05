@@ -21,22 +21,19 @@ class GraphicalParticle(Particle):
         raise NotImplementedError
 
     @property
-    def dimensions(self) -> Tuple[Number, Number]:
+    def dimension(self) -> Number:
         raise NotImplementedError
 
     @property
-    def graphical_dimensions(self):
-        return (
-            max(1, self.dimensions[0] / self.universe.zoom_level),
-            max(1, self.dimensions[1] / self.universe.zoom_level),
-        )
+    def graphical_dimension(self):
+        return max(1, self.dimension / self.universe.zoom_level)
 
     @property
     def graphical_position(self):
         self.old_graphical_position = self.present_graphical_position
         self.present_graphical_position = (
-            (self.position[0] / self.universe.zoom_level + (self.universe.width / 2) - (self.dimensions[0] / 2)),
-            (self.position[1] / self.universe.zoom_level + (self.universe.height / 2) - (self.dimensions[1] / 2)),
+            (self.position[0] / self.universe.zoom_level) + (self.universe.width / 2),
+            (self.position[1] / self.universe.zoom_level) + (self.universe.height / 2),
         )
         return self.present_graphical_position
 
@@ -67,28 +64,25 @@ class Universe:
     def erase_units(self) -> None:
         for particle in self._units:
             if particle.is_alive or True:
-                gd = particle.graphical_dimensions
-                pygame.draw.rect(
+                gd = round(particle.graphical_dimension)
+                pygame.draw.circle(
                     self._window,
                     (0, 0, 0),
-                    (
-                        particle.old_graphical_position[0],
-                        particle.old_graphical_position[1],
-                        gd[0],
-                        gd[1],
-                    ),
+                    (round(particle.old_graphical_position[0]), round(particle.old_graphical_position[1])),
+                    gd,
+                    gd,
                 )
 
     def render_units(self) -> None:
         for particle in self._units:
             if particle.is_alive:
-                gd = particle.graphical_dimensions
-                pygame.draw.rect(
+                gp = particle.graphical_position
+                pygame.draw.circle(
                     self._window,
                     particle.color,
-                    (particle.graphical_position[0], particle.graphical_position[1], gd[0], gd[1]),
-                    # there is a bug which makes caching particle.graphical_position in a variable
-                    # which causes some dead particles be displayed
+                    (round(gp[0]), round(gp[1])),
+                    round(particle.graphical_dimension),
+                    round(particle.graphical_dimension),
                 )
 
     def apply_laws(self):
@@ -124,6 +118,10 @@ class Universe:
                 total_time += 1
                 if self.sync_time:
                     time.sleep(0.01)
+                #
+                # if total_time % 5000 == 0:
+                #     self.zoom_level += 1
 
             except KeyboardInterrupt:
                 run = False
+        print(total_time)
