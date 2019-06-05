@@ -103,8 +103,12 @@ class Universe:
         total_time = 0
         while run:
             try:
+                total_time += 1
+
                 if not self.draw_trajectory:
                     self.erase_units()
+                if total_time % 2000 == 0:
+                    self.zoom_level += 1
                 self.render_units()
                 self.apply_laws()
                 self.update_particle_positions()
@@ -115,12 +119,8 @@ class Universe:
                     if event.type == pygame.QUIT:
                         run = False
 
-                total_time += 1
                 if self.sync_time:
                     time.sleep(0.01)
-                #
-                # if total_time % 5000 == 0:
-                #     self.zoom_level += 1
 
             except KeyboardInterrupt:
                 run = False

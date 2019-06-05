@@ -1,6 +1,5 @@
 # todo : make Merge law depend on particle dimensions (maybe not good idea)
 # todo : make color of merged particles be the color of the biggest one
-# todo : zoom during execution
 
 
 from math import sqrt
