@@ -1,5 +1,10 @@
 # todo : split engine from graphical engine
 # todo : remove is_alive from Particle
+# todo : remove dead particle
+# todo : copy particles before applying laws
+# todo : display only if in screen
+# todo : display key data in the screen
+# todo : move in the screen with the mouse
 
 from __future__ import annotations
 
@@ -61,6 +66,7 @@ class Universe:
         self._units: List[GraphicalParticle] = []
         self._window = pygame.display.set_mode((self.width, self.height))
         self.laws: List[Law] = []
+        self._next_zoom_delta = 0
 
     def add_unit(self, particle: GraphicalParticle):
         self._units.append(particle)
@@ -73,8 +79,8 @@ class Universe:
                     self._window,
                     (0, 0, 0),
                     (round(particle.old_graphical_position[0]), round(particle.old_graphical_position[1])),
-                    gd,
-                    gd,
+                    gd * 2,
+                    gd * 2,
                 )
 
     def render_units(self) -> None:
@@ -102,6 +108,14 @@ class Universe:
             if unit.is_alive:
                 unit.exist()
 
+    def ask_for_zoom(self, level_delta):
+        if self._next_zoom_delta + level_delta + self.zoom_level >= 1:
+            self._next_zoom_delta += level_delta
+
+    def zoom(self):
+        self.zoom_level += self._next_zoom_delta
+        self._next_zoom_delta = 0
+
     def loop(self):
         run = True
         total_time = 0
@@ -111,8 +125,7 @@ class Universe:
 
                 if not self.draw_trajectory:
                     self.erase_units()
-                if total_time % 2000 == 0:
-                    self.zoom_level += 1
+                self.zoom()
                 self.render_units()
                 self.apply_laws()
                 self.update_particle_positions()
@@ -122,6 +135,11 @@ class Universe:
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
                         run = False
+                    elif event.type == pygame.MOUSEBUTTONDOWN:
+                        if event.button == 4:  # scroll up
+                            self.ask_for_zoom(-1)
+                        elif event.button == 5:  # scroll down
+                            self.ask_for_zoom(1)
 
                 if self.sync_time:
                     time.sleep(0.01)
