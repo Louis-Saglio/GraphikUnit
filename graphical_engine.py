@@ -1,3 +1,6 @@
+# todo : split engine from graphical engine
+# todo : remove is_alive from Particle
+
 from __future__ import annotations
 
 import time
@@ -6,7 +9,8 @@ from typing import List, Tuple
 
 import pygame
 
-from physics import Particle, Law, Number
+from physics import Particle, Law
+from utils import Number
 
 
 class GraphicalParticle(Particle):

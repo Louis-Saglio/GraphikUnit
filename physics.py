@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from math import sqrt
-from typing import Tuple, List, Union
+from typing import Tuple, List
 
-Number = Union[int, float]
+from utils import Number
 
 
 class Particle:
@@ -25,7 +24,3 @@ class Particle:
 class Law:
     def compute_force(self, particle: Particle, other_particle: Particle) -> Tuple[Number, Number]:
         raise NotImplementedError
-
-
-def distance_between(position, other_position):
-    return sqrt((position[0] - other_position[0]) ** 2 + (position[1] - other_position[1]) ** 2)
