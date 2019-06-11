@@ -67,14 +67,14 @@ options = {
 
 if __name__ == "__main__":
     main(
-        100,
+        200,
         options["special_particles"]["none"],
         options["mass"]["1"],
-        options["position"]["in_screen"],
+        options["position"]["in_half_screen"],
         options["velocity"]["0"],
         # options["velocity"]["rand_0.5"],
         options["laws"]["realistic"],
-        draw_trajectory=False,
+        draw_trajectory=True,
         sync_time=False,
         zoom_level=1,
     )

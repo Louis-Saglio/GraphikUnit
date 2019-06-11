@@ -75,6 +75,7 @@ class Universe:
         self._texts_to_erase = []
         self._font_size = 20
         self._font = pygame.font.SysFont(None, self._font_size)
+        self.must_erase_screen = False
 
     def add_unit(self, particle: GraphicalParticle):
         self._units.append(particle)
@@ -124,13 +125,25 @@ class Universe:
             self._next_zoom_delta += level_delta
 
     def zoom(self):
+        if self._next_zoom_delta and self.draw_trajectory:
+            self.ask_for_erase_screen()
         self.zoom_level += self._next_zoom_delta
         self._next_zoom_delta = 0
+
+    def ask_for_erase_screen(self):
+        self.must_erase_screen = True
+
+    def erase_screen(self):
+        if self.must_erase_screen:
+            pygame.draw.rect(self._window, (0, 0, 0), ((0, 0), (self.width, self.height)))
+            self.must_erase_screen = False
 
     def ask_for_shift(self, shift_level):
         self._next_shift = shift_level
 
     def shift(self):
+        if self._next_shift != [0, 0]:
+            self.ask_for_erase_screen()
         self._shift[0] += self._next_shift[0]
         self._shift[1] += self._next_shift[1]
         self._next_shift = [0, 0]
@@ -165,6 +178,7 @@ class Universe:
 
                 if not self.draw_trajectory:
                     self.erase_units()
+                self.erase_screen()
                 self.zoom()
                 self.shift()
                 self.render_units()
