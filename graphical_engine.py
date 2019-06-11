@@ -13,6 +13,7 @@ from tkinter import Tk
 from typing import List, Tuple
 
 import pygame
+from pygame.rect import Rect
 
 from physics import Particle, Law
 from utils import Number
@@ -56,6 +57,7 @@ class Universe:
         draw_trajectory=False,
         sync_time=False,
     ):
+        pygame.init()
         self.zoom_level = zoom_level  # 1 is normal, 2 is twice un-zoomed, 0.5 is twice zoomed
         self.sync_time = sync_time
         self.draw_trajectory = draw_trajectory
@@ -67,6 +69,12 @@ class Universe:
         self._window = pygame.display.set_mode((self.width, self.height))
         self.laws: List[Law] = []
         self._next_zoom_delta = 0
+        self._shift = [0, 0]
+        self._next_shift = [0, 0]
+        self._texts_to_display = []
+        self._texts_to_erase = []
+        self._font_size = 20
+        self._font = pygame.font.SysFont(None, self._font_size)
 
     def add_unit(self, particle: GraphicalParticle):
         self._units.append(particle)
@@ -78,7 +86,10 @@ class Universe:
                 pygame.draw.circle(
                     self._window,
                     (0, 0, 0),
-                    (round(particle.old_graphical_position[0]), round(particle.old_graphical_position[1])),
+                    (
+                        round(particle.old_graphical_position[0] + self._shift[0]),
+                        round(particle.old_graphical_position[1] + self._shift[1]),
+                    ),
                     gd * 2,
                     gd * 2,
                 )
@@ -90,7 +101,7 @@ class Universe:
                 pygame.draw.circle(
                     self._window,
                     particle.color,
-                    (round(gp[0]), round(gp[1])),
+                    (round(gp[0] + self._shift[0]), round(gp[1] + self._shift[1])),
                     round(particle.graphical_dimension),
                     round(particle.graphical_dimension),
                 )
@@ -116,7 +127,36 @@ class Universe:
         self.zoom_level += self._next_zoom_delta
         self._next_zoom_delta = 0
 
+    def ask_for_shift(self, shift_level):
+        self._next_shift = shift_level
+
+    def shift(self):
+        self._shift[0] += self._next_shift[0]
+        self._shift[1] += self._next_shift[1]
+        self._next_shift = [0, 0]
+
+    def display_text(self):
+        next_pos = [0, 0]
+        while self._texts_to_display:
+            text = self._texts_to_display.pop(0)
+            self._texts_to_erase.append(text)
+            text_surface = self._font.render(text, True, (255, 255, 255), (0, 0, 0))
+            self._window.blit(text_surface, next_pos)
+            next_pos[1] += self._font_size
+
+    def erase_text(self):
+        next_pos = [0, 0]
+        while self._texts_to_erase:
+            text = self._texts_to_erase.pop(0)
+            text_surface = self._font.render(text, True, (255, 255, 255), (255, 255, 255))
+            self._window.blit(text_surface, next_pos)
+            next_pos[1] += self._font_size
+
+    def ask_for_text_display(self, text: str):
+        self._texts_to_display.append(text)
+
     def loop(self):
+        pygame.init()
         run = True
         total_time = 0
         while run:
@@ -126,9 +166,19 @@ class Universe:
                 if not self.draw_trajectory:
                     self.erase_units()
                 self.zoom()
+                self.shift()
                 self.render_units()
                 self.apply_laws()
                 self.update_particle_positions()
+
+                self.ask_for_text_display(str(total_time))
+                alive_particles = [p for p in self._units if p.is_alive]
+                self.ask_for_text_display(str(len(alive_particles)))
+                self.ask_for_text_display(str(round(sum([p.velocity[0] for p in alive_particles]), 1)))
+                self.ask_for_text_display(str(round(sum([p.velocity[1] for p in alive_particles]), 1)))
+
+                self.erase_text()
+                self.display_text()
 
                 pygame.display.flip()
 
@@ -140,6 +190,15 @@ class Universe:
                             self.ask_for_zoom(-1)
                         elif event.button == 5:  # scroll down
                             self.ask_for_zoom(1)
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_LEFT:
+                            self.ask_for_shift((-100, 0))
+                        elif event.key == pygame.K_RIGHT:
+                            self.ask_for_shift((100, 0))
+                        elif event.key == pygame.K_UP:
+                            self.ask_for_shift((0, -100))
+                        elif event.key == pygame.K_DOWN:
+                            self.ask_for_shift((0, 100))
 
                 if self.sync_time:
                     time.sleep(0.01)
