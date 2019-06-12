@@ -188,8 +188,9 @@ class Universe:
                 self.ask_for_text_display(str(total_time))
                 alive_particles = [p for p in self._units if p.is_alive]
                 self.ask_for_text_display(str(len(alive_particles)))
-                self.ask_for_text_display(str(round(sum([p.velocity[0] for p in alive_particles]), 1)))
-                self.ask_for_text_display(str(round(sum([p.velocity[1] for p in alive_particles]), 1)))
+                self.ask_for_text_display(
+                    str(round(sum([(sum(p.velocity) / 2) * p.mass for p in alive_particles]), 5))
+                )
 
                 self.erase_text()
                 self.display_text()
