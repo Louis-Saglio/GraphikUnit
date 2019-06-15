@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import Tuple, List
 
 from utils import Number

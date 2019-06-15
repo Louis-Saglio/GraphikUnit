@@ -39,9 +39,9 @@ def main(
 options = {
     "mass": {"1": lambda: 1, "1to10": lambda: randint(1, 10)},
     "position": {
-        "in_screen": lambda u: [randint(-u.width / 2, u.width / 2), randint(-u.height / 2, u.height / 2)],
-        "in_twice_screen": lambda u: [randint(-u.width, u.width), randint(-u.height, u.height)],
-        "in_half_screen": lambda u: [randint(-u.width / 4, u.width / 4), randint(-u.height / 4, u.height / 4)],
+        "in_screen": lambda u: [random() * u.width - u.width / 2, random() * u.height - u.height / 2],
+        "in_twice_screen": lambda u: [random() * u.width * 2 - u.width, random() * u.height * 2 - u.height],
+        "in_half_screen": lambda u: [random() * u.width - u.width / 4, random() * u.height - u.height / 4],
         "in_2_3rd_of_screen": lambda u: [randint(-u.width / 3, u.width / 3), randint(-u.height / 3, u.height / 3)],
     },
     "velocity": {
@@ -67,14 +67,14 @@ options = {
 
 if __name__ == "__main__":
     main(
-        200,
+        1000,
         options["special_particles"]["none"],
         options["mass"]["1"],
         options["position"]["in_half_screen"],
         options["velocity"]["0"],
         # options["velocity"]["rand_0.5"],
         options["laws"]["realistic"],
-        draw_trajectory=True,
+        draw_trajectory=False,
         sync_time=False,
         zoom_level=1,
     )

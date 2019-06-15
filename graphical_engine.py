@@ -1,26 +1,20 @@
 # todo : split engine from graphical engine
 # todo : remove is_alive from Particle
 # todo : remove dead particle
-# todo : copy particles before applying laws
 # todo : display only if in screen
-# todo : display key data in the screen
-# todo : move in the screen with the mouse
-
-from __future__ import annotations
 
 import time
 from tkinter import Tk
 from typing import List, Tuple
 
 import pygame
-from pygame.rect import Rect
 
 from physics import Particle, Law
 from utils import Number
 
 
 class GraphicalParticle(Particle):
-    def __init__(self, universe: Universe, mass: Number, position: List[Number], velocity: List[Number]):
+    def __init__(self, universe: "Universe", mass: Number, position: List[Number], velocity: List[Number]):
         super().__init__(mass, position, velocity)
         self.universe = universe
         self.old_graphical_position = [0, 0]
@@ -169,7 +163,6 @@ class Universe:
         self._texts_to_display.append(text)
 
     def loop(self):
-        pygame.init()
         run = True
         total_time = 0
         while run:

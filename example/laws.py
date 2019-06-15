@@ -23,7 +23,7 @@ class Merge(Law):
 
 
 class Gravity(Law):
-    g = 0.001
+    g = 0.1
 
     def compute_force(self, particle: Particle, other_particle: Particle) -> Tuple[Number, Number]:
         distance = distance_between(particle.position, other_particle.position)
