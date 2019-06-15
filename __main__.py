@@ -1,16 +1,12 @@
-from os.path import dirname, realpath
-from sys import path
-
-path.append(dirname(dirname(realpath(__file__))))
-
-
 from random import randint, random
 from typing import List, Callable
 
-from graphical_engine import GraphicalParticle, Universe
+from newchanic.graphical_engine import GraphicalParticle, Universe
+from newchanic.physics import Law
+from newchanic.utils import Number
+
 from laws import Gravity, Merge
 from particles import Atom
-from physics import Number, Law
 
 
 def main(

@@ -2,8 +2,8 @@ from math import sqrt
 from random import randint
 from typing import Tuple, List
 
-from graphical_engine import GraphicalParticle, Universe
-from physics import Number
+from newchanic.graphical_engine import GraphicalParticle, Universe
+from newchanic.utils import Number
 
 
 class Atom(GraphicalParticle):

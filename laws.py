@@ -1,7 +1,7 @@
 from typing import Tuple
 
-from physics import Law, Particle, Number
-from utils import distance_between
+from newchanic.physics import Law, Particle
+from newchanic.utils import distance_between, Number
 
 
 class Merge(Law):
